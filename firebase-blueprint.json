@@ -1,0 +1,25 @@
+{
+  "entities": {
+    "Generation": {
+      "title": "Generation",
+      "description": "A record of a generated cinematic life story.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "The user ID of the creator." },
+        "character": { "type": "object", "description": "The selected character profile." },
+        "location": { "type": "string", "description": "The selected location." },
+        "imagePrompt": { "type": "object", "description": "The generated image prompt." },
+        "script": { "type": "object", "description": "The generated script." },
+        "scenes": { "type": "array", "description": "The generated scenes." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "When the generation was created." }
+      },
+      "required": ["uid", "character", "location", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/generations/{generationId}": {
+      "schema": "Generation",
+      "description": "User's past cinematic life story generations."
+    }
+  }
+}

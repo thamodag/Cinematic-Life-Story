@@ -25,7 +25,8 @@ import {
   Mail,
   Lock,
   Eye,
-  EyeOff
+  EyeOff,
+  X
 } from 'lucide-react';
 import { 
   generateCharacters, 
@@ -156,12 +157,15 @@ export default function App() {
     try {
       const q = query(
         collection(db, 'generations'),
-        where('uid', '==', uid),
-        orderBy('createdAt', 'desc')
+        where('uid', '==', uid)
       );
       const querySnapshot = await getDocs(q);
       const docs = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setHistory(docs);
+      // Sort client-side to avoid composite index requirement
+      const sortedDocs = docs.sort((a: any, b: any) => 
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+      setHistory(sortedDocs);
     } catch (error) {
       console.error("Error fetching history:", error);
     } finally {
@@ -647,13 +651,17 @@ export default function App() {
         {/* History Overlay */}
         <AnimatePresence>
           {showHistory && (
-            <div className="fixed inset-0 z-50 flex items-center justify-end p-6 bg-[#141414]/40 backdrop-blur-sm">
+            <div 
+              className="fixed inset-0 z-50 flex items-center justify-end p-6 bg-[#141414]/40 backdrop-blur-sm"
+              onClick={() => setShowHistory(false)}
+            >
               <motion.div 
                 initial={{ x: '100%' }}
                 animate={{ x: 0 }}
                 exit={{ x: '100%' }}
                 transition={{ type: 'spring', damping: 25, stiffness: 200 }}
                 className="w-full max-w-xl h-full bg-[#E4E3E0] border-l border-[#141414] shadow-2xl flex flex-col"
+                onClick={(e) => e.stopPropagation()}
               >
                 <div className="p-8 border-b border-[#141414]/10 flex justify-between items-center">
                   <div className="flex items-center gap-3">
@@ -664,7 +672,7 @@ export default function App() {
                     onClick={() => setShowHistory(false)}
                     className="p-2 hover:bg-[#141414]/5 transition-colors"
                   >
-                    <ArrowLeft className="w-5 h-5" />
+                    <X className="w-5 h-5" />
                   </button>
                 </div>
 
@@ -1020,9 +1028,9 @@ export default function App() {
 
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
                     <div className="lg:col-span-8 space-y-12">
-                      <div className="p-12 border border-[#141414] bg-white shadow-xl relative group overflow-hidden">
+                      <div className="p-8 border border-[#141414] bg-white shadow-xl relative group overflow-hidden">
                         <div className="absolute top-0 left-0 w-2 h-full bg-[#141414]/5"></div>
-                        <div className="absolute top-8 right-8 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="absolute top-6 right-6 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                           <button
                             onClick={handleGenerateMainImage}
                             disabled={generatingMainImage}
@@ -1033,9 +1041,9 @@ export default function App() {
                           </button>
                           <CopyButton text={imagePrompt.prompt} />
                         </div>
-                        <h3 className="text-[10px] font-mono font-bold uppercase tracking-[0.4em] opacity-30 mb-10 border-b border-[#141414]/10 pb-4">Master Image Prompt</h3>
+                        <h3 className="text-[10px] font-mono font-bold uppercase tracking-[0.4em] opacity-30 mb-8 border-b border-[#141414]/10 pb-4">Master Image Prompt</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                          <p className="text-3xl leading-relaxed font-serif text-[#141414]/90 selection:bg-yellow-200">{imagePrompt.prompt}</p>
+                          <p className="text-xl leading-relaxed font-serif text-[#141414]/90 selection:bg-yellow-200">{imagePrompt.prompt}</p>
                           {mainImageUrl && (
                             <motion.div 
                               initial={{ opacity: 0, scale: 0.9 }}
@@ -1222,14 +1230,14 @@ export default function App() {
 
                   <div className="grid grid-cols-1 gap-12">
                     {/* Native Script */}
-                    <div className="p-12 md:p-20 border border-[#141414] bg-white shadow-[30px_30px_0px_0px_rgba(20,20,20,0.05)] relative group overflow-hidden">
+                    <div className="p-8 md:p-12 border border-[#141414] bg-white shadow-[30px_30px_0px_0px_rgba(20,20,20,0.05)] relative group overflow-hidden">
                       <div className="absolute top-0 right-0 w-48 h-48 opacity-[0.02] -mr-16 -mt-16">
                         <FileText className="w-full h-full" />
                       </div>
-                      <div className="absolute top-10 right-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="absolute top-8 right-8 opacity-0 group-hover:opacity-100 transition-opacity">
                         <CopyButton text={script.native} label={`Copy ${selectedCharacter?.language}`} />
                       </div>
-                      <div className="space-y-12">
+                      <div className="space-y-10">
                         <div className="flex justify-between items-start border-b border-[#141414]/10 pb-6">
                           <div className="space-y-1">
                             <p className="text-[10px] font-mono uppercase tracking-[0.3em] opacity-40">Native Script</p>
@@ -1237,7 +1245,7 @@ export default function App() {
                           </div>
                         </div>
                         
-                        <div className="font-serif text-4xl md:text-5xl leading-[1.2] tracking-tight text-[#141414] italic relative px-8">
+                        <div className="font-serif text-2xl md:text-3xl leading-[1.2] tracking-tight text-[#141414] italic relative px-8">
                           <span className="absolute -left-4 -top-8 text-[12rem] opacity-[0.03] font-serif pointer-events-none">"</span>
                           {script.native}
                           <span className="absolute -right-4 bottom-[-4rem] text-[12rem] opacity-[0.03] font-serif pointer-events-none">"</span>
@@ -1246,11 +1254,11 @@ export default function App() {
                     </div>
 
                     {/* English Translation */}
-                    <div className="p-12 md:p-20 border border-[#141414] bg-[#141414]/5 shadow-[30px_30px_0px_0px_rgba(20,20,20,0.02)] relative group overflow-hidden">
-                      <div className="absolute top-10 right-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="p-8 md:p-12 border border-[#141414] bg-[#141414]/5 shadow-[30px_30px_0px_0px_rgba(20,20,20,0.02)] relative group overflow-hidden">
+                      <div className="absolute top-8 right-8 opacity-0 group-hover:opacity-100 transition-opacity">
                         <CopyButton text={script.english} label="Copy English" />
                       </div>
-                      <div className="space-y-12">
+                      <div className="space-y-10">
                         <div className="flex justify-between items-start border-b border-[#141414]/10 pb-6">
                           <div className="space-y-1">
                             <p className="text-[10px] font-mono uppercase tracking-[0.3em] opacity-40">Translation</p>
@@ -1258,7 +1266,7 @@ export default function App() {
                           </div>
                         </div>
                         
-                        <div className="font-serif text-2xl md:text-3xl leading-[1.4] tracking-tight text-[#141414]/70 italic relative px-8">
+                        <div className="font-serif text-lg md:text-xl leading-[1.4] tracking-tight text-[#141414]/70 italic relative px-8">
                           {script.english}
                         </div>
                       </div>

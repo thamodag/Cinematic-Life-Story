@@ -312,10 +312,10 @@ export default function App() {
   const [scenes, setScenes] = useState<any[]>([]);
 
   useEffect(() => {
-    if (step === 'characters' && characters.length === 0) {
+    if (step === 'characters' && characters.length === 0 && !loading) {
       handleGenerateCharacters();
     }
-  }, [step]);
+  }, [step, characters.length]);
 
   const handleGenerateCharacters = async () => {
     setLoading(true);
@@ -588,7 +588,7 @@ export default function App() {
                       required
                       value={authEmail}
                       onChange={(e) => setAuthEmail(e.target.value)}
-                      className="w-full pl-12 pr-4 py-4 bg-[#141414]/5 border border-[#141414]/10 focus:border-[#141414] outline-none text-sm font-bold tracking-tight"
+                      className="w-full pl-12 pr-4 py-4 bg-[#141414]/5 border border-[#141414]/10 focus:border-[#141414] outline-none text-sm font-bold tracking-tight text-[#141414]"
                       placeholder="name@example.com"
                     />
                   </div>
@@ -603,7 +603,7 @@ export default function App() {
                       required
                       value={authPassword}
                       onChange={(e) => setAuthPassword(e.target.value)}
-                      className="w-full pl-12 pr-12 py-4 bg-[#141414]/5 border border-[#141414]/10 focus:border-[#141414] outline-none text-sm font-bold tracking-tight"
+                      className="w-full pl-12 pr-12 py-4 bg-[#141414]/5 border border-[#141414]/10 focus:border-[#141414] outline-none text-sm font-bold tracking-tight text-[#141414]"
                       placeholder="••••••••"
                     />
                     <button 
@@ -786,6 +786,14 @@ export default function App() {
                     </div>
                     <div className="flex items-center gap-4">
                       <button 
+                        onClick={handleGenerateCharacters}
+                        disabled={loading}
+                        className="p-3 border border-[#141414] bg-white/50 hover:bg-[#141414] hover:text-[#E4E3E0] transition-all disabled:opacity-50"
+                        title="Refresh Samples"
+                      >
+                        <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                      </button>
+                      <button 
                         onClick={() => setShowManual(!showManual)}
                         className={`px-6 py-3 border border-[#141414] text-[10px] font-bold uppercase tracking-widest transition-all flex items-center gap-2 ${showManual ? 'bg-[#141414] text-[#E4E3E0]' : 'bg-white/50 hover:bg-white'}`}
                       >
@@ -807,11 +815,11 @@ export default function App() {
                         <form onSubmit={handleManualSubmit} className="p-12 border border-[#141414] bg-white/40 backdrop-blur-md shadow-[20px_20px_0px_0px_rgba(20,20,20,0.05)] space-y-10">
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                             <div className="space-y-3">
-                              <label className="text-[10px] font-mono uppercase tracking-widest opacity-40">Gender</label>
+                              <label className="text-[10px] font-mono uppercase tracking-widest opacity-60">Gender</label>
                               <select 
                                 value={manualGender}
                                 onChange={(e) => setManualGender(e.target.value)}
-                                className="w-full p-4 bg-white/50 border border-[#141414]/10 focus:border-[#141414] outline-none text-sm font-bold uppercase tracking-widest"
+                                className="w-full p-4 bg-white/50 border border-[#141414]/10 focus:border-[#141414] outline-none text-sm font-bold uppercase tracking-widest text-[#141414]"
                               >
                                 <option>Male</option>
                                 <option>Female</option>
@@ -820,12 +828,12 @@ export default function App() {
                               </select>
                             </div>
                             <div className="space-y-3">
-                              <label className="text-[10px] font-mono uppercase tracking-widest opacity-40">Age</label>
+                              <label className="text-[10px] font-mono uppercase tracking-widest opacity-60">Age</label>
                               <input 
                                 type="number"
                                 value={manualAge}
                                 onChange={(e) => setManualAge(e.target.value)}
-                                className="w-full p-4 bg-white/50 border border-[#141414]/10 focus:border-[#141414] outline-none text-sm font-bold"
+                                className="w-full p-4 bg-white/50 border border-[#141414]/10 focus:border-[#141414] outline-none text-sm font-bold text-[#141414]"
                                 placeholder="Enter age..."
                               />
                             </div>
@@ -833,11 +841,11 @@ export default function App() {
 
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                             <div className="space-y-3">
-                              <label className="text-[10px] font-mono uppercase tracking-widest opacity-40">Country / Culture</label>
+                              <label className="text-[10px] font-mono uppercase tracking-widest opacity-60">Country / Culture</label>
                               <select 
                                 value={manualCountry}
                                 onChange={(e) => setManualCountry(e.target.value)}
-                                className="w-full p-4 bg-white/50 border border-[#141414]/10 focus:border-[#141414] outline-none text-sm font-bold uppercase tracking-widest"
+                                className="w-full p-4 bg-white/50 border border-[#141414]/10 focus:border-[#141414] outline-none text-sm font-bold uppercase tracking-widest text-[#141414]"
                               >
                                 {COUNTRIES.map(c => (
                                   <option key={c} value={c}>{c}</option>
@@ -845,11 +853,11 @@ export default function App() {
                               </select>
                             </div>
                             <div className="space-y-3">
-                              <label className="text-[10px] font-mono uppercase tracking-widest opacity-40">Script Language</label>
+                              <label className="text-[10px] font-mono uppercase tracking-widest opacity-60">Script Language</label>
                               <select 
                                 value={manualLanguage}
                                 onChange={(e) => setManualLanguage(e.target.value)}
-                                className="w-full p-4 bg-white/50 border border-[#141414]/10 focus:border-[#141414] outline-none text-sm font-bold uppercase tracking-widest"
+                                className="w-full p-4 bg-white/50 border border-[#141414]/10 focus:border-[#141414] outline-none text-sm font-bold uppercase tracking-widest text-[#141414]"
                               >
                                 {LANGUAGES.map(l => (
                                   <option key={l} value={l}>{l}</option>
@@ -859,11 +867,11 @@ export default function App() {
                           </div>
 
                           <div className="space-y-3">
-                            <label className="text-[10px] font-mono uppercase tracking-widest opacity-40">Job Role / Profession</label>
+                            <label className="text-[10px] font-mono uppercase tracking-widest opacity-60">Job Role / Profession</label>
                             <div className="flex flex-col gap-4">
                               <select 
                                 onChange={(e) => setManualRole(e.target.value)}
-                                className="w-full p-4 bg-white/50 border border-[#141414]/10 focus:border-[#141414] outline-none text-sm font-bold uppercase tracking-widest"
+                                className="w-full p-4 bg-white/50 border border-[#141414]/10 focus:border-[#141414] outline-none text-sm font-bold uppercase tracking-widest text-[#141414]"
                               >
                                 <option value="">Select a role...</option>
                                 {COMMON_ROLES.map(role => (
@@ -879,7 +887,7 @@ export default function App() {
                                 type="text"
                                 value={manualRole}
                                 onChange={(e) => setManualRole(e.target.value)}
-                                className="w-full p-4 bg-white/50 border border-[#141414]/10 focus:border-[#141414] outline-none text-sm font-bold"
+                                className="w-full p-4 bg-white/50 border border-[#141414]/10 focus:border-[#141414] outline-none text-sm font-bold text-[#141414]"
                                 placeholder="Type a custom role..."
                               />
                             </div>
@@ -910,7 +918,7 @@ export default function App() {
                             transition={{ delay: i * 0.05 }}
                             whileHover={{ scale: 1.02, y: -4 }}
                             onClick={() => handleSelectCharacter(char)}
-                            className="group relative flex flex-col p-10 border border-[#141414] bg-white/40 backdrop-blur-md hover:bg-[#141414] hover:text-[#E4E3E0] transition-all text-left shadow-[10px_10px_0px_0px_rgba(20,20,20,0.05)] hover:shadow-[20px_20px_0px_0px_rgba(20,20,20,0.1)]"
+                            className="group relative flex flex-col p-10 border border-[#141414] bg-white/40 backdrop-blur-md text-[#141414] hover:bg-[#141414] hover:text-[#E4E3E0] transition-all text-left shadow-[10px_10px_0px_0px_rgba(20,20,20,0.05)] hover:shadow-[20px_20px_0px_0px_rgba(20,20,20,0.1)]"
                           >
                             <div className="absolute top-0 right-0 p-6 opacity-[0.03] group-hover:opacity-10 transition-opacity">
                               <User className="w-24 h-24 -mr-4 -mt-4" />

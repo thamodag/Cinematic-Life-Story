@@ -484,7 +484,7 @@ export default function App() {
       `NATIVE SCRIPT (${selectedCharacter?.language}):\n${script?.native}\n\n` +
       `ENGLISH TRANSLATION:\n${script?.english}\n\n` +
       `SCENES:\n` +
-      scenes.map((s, i) => `SCENE 0${i+1}\nSCRIPT: ${s.scriptLine}\nPROMPT: ${s.characterDescription}\nCAMERA: ${s.camera}\nENVIRONMENT: ${s.environment}`).join('\n\n');
+      scenes.map((s, i) => `SCENE 0${i+1}\nDESCRIPTION: ${s.description}\nSCRIPT: ${s.scriptLine}\nPROMPT: ${s.imagePrompt || s.characterDescription}\nCAMERA: ${s.camera}\nENVIRONMENT: ${s.environment}`).join('\n\n');
     
     const blob = new Blob([content], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
@@ -1340,6 +1340,11 @@ export default function App() {
                               <div className="flex flex-col">
                                 <span className="text-[10px] font-mono font-bold uppercase tracking-[0.4em] opacity-40">Sequence</span>
                                 <span className="text-sm font-black uppercase tracking-[0.2em]">Scene 0{i + 1}</span>
+                                {scene.description && (
+                                  <p className="text-[10px] font-mono opacity-60 uppercase tracking-widest mt-2 max-w-[200px] leading-relaxed">
+                                    {scene.description}
+                                  </p>
+                                )}
                               </div>
                             </div>
                             <div className="space-y-8 border-l-2 border-[#141414] pl-8 py-2">

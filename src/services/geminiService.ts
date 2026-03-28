@@ -128,19 +128,17 @@ export const generateScript = async (characterDescription: string, topic: string
       systemInstruction: `You are a Life Story & Advice Script Writer.
 LANGUAGE: The "native" script MUST be written entirely in ${language}.
 TRANSLATION: Provide a faithful "english" translation of the script.
-LENGTH: 130–150 words for the native script.
+LENGTH: 120–130 words for the native script (strictly optimized for a 60-second slow-paced delivery).
 VOICE: First person.
 TONE: Real person, hard full life, NOT motivational, NOT poetic, pauses, short sentences, rough edges.
 CULTURE: The script should reflect the cultural nuances, idioms, and values of ${country}.
-STRUCTURE:
-1. OPENING: Specific memory (30-35 words).
-2. MIDDLE: What happened + cost (60-65 words).
-3. CLOSING: Advice (40-50 words).
+STRUCTURE (Narrative Arc for Clarity):
+1. OPENING: A vivid, specific memory that sets the scene (25-30 words).
+2. MIDDLE: The core conflict or turning point—what happened and what it cost (55-60 words).
+3. CLOSING: A grounded, hard-won lesson or advice for the next generation (35-40 words).
 
 BANNED: "Life is a journey", "I've learned that", "Trust the process", rhyming, inspirational poster language.
-Start mid-scene. Use sensory details.
-
-Return as a JSON object with "native" and "english" keys.`,
+Start mid-scene. Use sensory details. Ensure the story is clear and easy to follow for any audience.`,
       responseMimeType: "application/json",
       responseSchema: {
         type: Type.OBJECT,
@@ -161,15 +159,33 @@ export const generateVideoScenes = async (characterDescription: string, script: 
     contents: `Character: ${characterDescription}. Script: ${script}. Country: ${country}. Language: ${language}. Generate scene-by-scene video prompts.`,
     config: {
       systemInstruction: `You are a Video Scene Prompt Generator for AI video tools.
-Split the script naturally at breath points. Each scene = exactly 8 seconds.
-PACING: Slow, unhurried, words land one at a time, 2-4s pauses.
+Split the script naturally into exactly 7 to 8 scenes to maintain a ~1 minute total duration.
+DURATION: Each scene = exactly 8 seconds. 
+
+FLOW & PACING:
+- Analyze the story and break it into meaningful emotional or narrative shifts.
+- Pacing should be slow and unhurried.
+
+CAMERA & VARIATION RULES:
+- For every new scene: CHANGE camera angle (front, 3/4, side profile, top-down, close-up, extreme close-up, wide shot, over-the-shoulder, low angle).
+- Vary lens feel (50mm, 85mm, macro, wide).
+- Adjust composition and framing for smooth visual continuity.
+
+EMOTION RULES:
+- Match facial expression and body language to the story moment (e.g., calm → thinking → pain → intensity → reflection → strength).
+- Add slight natural variation in pose and micro-expression while maintaining identity.
+
+CONSISTENCY RULES:
+- Maintain identical facial features, same age, same hairstyle, same clothing/uniform details across all scenes.
+- Keep the same character identity in every frame.
 
 Return a JSON array of scene objects. Each scene MUST include:
+- description: string (A short scene description representing a meaningful emotional or narrative shift)
 - scriptLine: string (The line from the script in ${language}, with [PAUSE], [SLOW], [HOLD] marks)
 - characterDescription: string (Full physical description fresh every scene, reflecting their age, state, and the culture of ${country})
 - expressionMicroMovement: object { eyes, brow, jawLips, overall }
 - bodyLanguage: string
-- camera: string
+- camera: string (Detailed camera angle, lens feel, and composition)
 - environment: string
 - imagePrompt: string (A consolidated, high-fidelity image prompt for this specific scene, combining character, environment, lighting, and camera angle)
 - voiceDirection: object { pace, tone, texture, delivery, languageNote: "Note on ${language} pronunciation/accent for ${country}" }

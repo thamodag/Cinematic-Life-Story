@@ -314,6 +314,7 @@ export default function App() {
   
   const [script, setScript] = useState<{native: string, english: string} | null>(null);
   const [scenes, setScenes] = useState<any[]>([]);
+  const [sceneCount, setSceneCount] = useState<number>(8);
 
   useEffect(() => {
     if (step === 'characters' && characters.length === 0 && !loading) {
@@ -435,7 +436,8 @@ export default function App() {
         imagePrompt.prompt, 
         script.native,
         selectedCharacter?.country || 'United States',
-        selectedCharacter?.language || 'English'
+        selectedCharacter?.language || 'English',
+        sceneCount
       );
       setScenes(data);
       setStep('scenes');
@@ -1218,7 +1220,21 @@ export default function App() {
                         The <br/>Monologue
                       </motion.h2>
                     </div>
-                    <div className="flex flex-wrap gap-4">
+                    <div className="flex flex-wrap items-center gap-6">
+                      <div className="flex flex-col gap-2">
+                        <span className="text-[9px] font-mono uppercase tracking-widest opacity-40">Number of Scenes</span>
+                        <div className="flex items-center gap-2">
+                          {[3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+                            <button
+                              key={num}
+                              onClick={() => setSceneCount(num)}
+                              className={`w-8 h-8 flex items-center justify-center text-[10px] font-bold border transition-all ${sceneCount === num ? 'bg-[#141414] text-[#E4E3E0] border-[#141414]' : 'border-[#141414]/20 hover:border-[#141414]'}`}
+                            >
+                              {num}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
                       <button 
                         onClick={handleGenerateScenes}
                         className="bg-[#141414] text-[#E4E3E0] px-10 py-4 text-[10px] font-bold uppercase tracking-widest flex items-center gap-3 hover:shadow-2xl transition-all hover:-translate-y-1"

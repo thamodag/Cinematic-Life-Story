@@ -156,16 +156,23 @@ Start mid-scene. Use sensory details. Ensure the story is clear and easy to foll
 export const generateVideoScenes = async (characterDescription: string, script: string, country: string, language: string, sceneCount: number = 8): Promise<any[]> => {
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
-    contents: `Character: ${characterDescription}. Script: ${script}. Country: ${country}. Language: ${language}. Generate exactly ${sceneCount} scene-by-scene video prompts.`,
+    contents: `Character: ${characterDescription}. Script: ${script}. Country: ${country}. Language: ${language}. Generate exactly ${sceneCount} scene-by-scene video prompts. IMPORTANT: The first scene MUST be a high-retention HOOK.`,
     config: {
       systemInstruction: `You are a Video Scene Prompt Generator for AI video tools.
 Split the script naturally into exactly ${sceneCount} scenes.
 DURATION: Each scene = exactly 8 seconds. 
 
-FLOW & PACING:
-- Analyze the story and break it into meaningful emotional or narrative shifts across exactly ${sceneCount} scenes.
+HOOK & RETENTION (SCENE 1):
+- Scene 1 MUST be a "Hook" designed for maximum audience retention.
+- It should summarize the core emotional or narrative value of the entire script.
+- It should highlight the "most valuable part" or a "dramatic peak" to grab attention immediately.
+- The script line for Scene 1 should be a summary or a powerful opening statement that keeps the audience watching.
+
+STORY FLOW (SCENE 2 TO ${sceneCount}):
+- The actual narrative/script distribution begins from Scene 2.
+- Analyze the story and break it into meaningful emotional or narrative shifts across the remaining ${sceneCount - 1} scenes.
 - Pacing should be slow and unhurried.
-- Ensure the story arc (Beginning, Middle, End) is perfectly distributed among the ${sceneCount} scenes.
+- Ensure the story arc (Beginning, Middle, End) is perfectly distributed among the remaining scenes.
 
 CAMERA & VARIATION RULES:
 - For every new scene: CHANGE camera angle (front, 3/4, side profile, top-down, close-up, extreme close-up, wide shot, over-the-shoulder, low angle).

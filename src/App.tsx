@@ -486,7 +486,10 @@ export default function App() {
       `NATIVE SCRIPT (${selectedCharacter?.language}):\n${script?.native}\n\n` +
       `ENGLISH TRANSLATION:\n${script?.english}\n\n` +
       `SCENES:\n` +
-      scenes.map((s, i) => `SCENE 0${i+1}\nDESCRIPTION: ${s.description}\nSCRIPT: ${s.scriptLine}\nPROMPT: ${s.imagePrompt || s.characterDescription}\nCAMERA: ${s.camera}\nENVIRONMENT: ${s.environment}`).join('\n\n');
+      scenes.map((s, i) => {
+        const type = i === 0 ? "HOOK SCENE (RETENTION)" : `SCENE 0${i + 1}`;
+        return `${type}\nDESCRIPTION: ${s.description}\nSCRIPT: ${s.scriptLine}\nPROMPT: ${s.imagePrompt || s.characterDescription}\nCAMERA: ${s.camera}\nENVIRONMENT: ${s.environment}`;
+      }).join('\n\n');
     
     const blob = new Blob([content], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
@@ -1355,7 +1358,14 @@ export default function App() {
                               </span>
                               <div className="flex flex-col">
                                 <span className="text-[10px] font-mono font-bold uppercase tracking-[0.4em] opacity-40">Sequence</span>
-                                <span className="text-sm font-black uppercase tracking-[0.2em]">Scene 0{i + 1}</span>
+                                <span className="text-sm font-black uppercase tracking-[0.2em]">
+                                  {i === 0 ? "Hook Scene" : `Scene 0${i + 1}`}
+                                </span>
+                                {i === 0 && (
+                                  <span className="mt-1 px-2 py-0.5 bg-red-500 text-white text-[8px] font-bold uppercase tracking-widest w-fit">
+                                    Retention Hook
+                                  </span>
+                                )}
                                 {scene.description && (
                                   <p className="text-[10px] font-mono opacity-60 uppercase tracking-widest mt-2 max-w-[200px] leading-relaxed">
                                     {scene.description}

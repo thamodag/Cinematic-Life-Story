@@ -419,6 +419,9 @@ export default function App() {
         selectedCharacter?.language || 'English'
       );
       setScript(data);
+      if (data.recommendedSceneCount) {
+        setSceneCount(data.recommendedSceneCount);
+      }
       setStep('script');
     } catch (error) {
       console.error(error);
@@ -485,10 +488,11 @@ export default function App() {
       `NEGATIVE PROMPT:\n${imagePrompt?.negative_prompt}\n\n` +
       `NATIVE SCRIPT (${selectedCharacter?.language}):\n${script?.native}\n\n` +
       `ENGLISH TRANSLATION:\n${script?.english}\n\n` +
+      (script?.sinhala ? `SINHALA TRANSLATION:\n${script.sinhala}\n\n` : '') +
       `SCENES:\n` +
       scenes.map((s, i) => {
         const type = i === 0 ? "HOOK SCENE (RETENTION)" : `SCENE 0${i + 1}`;
-        return `${type}\nDESCRIPTION: ${s.description}\nSCRIPT: ${s.scriptLine}\nPROMPT: ${s.imagePrompt || s.characterDescription}\nCAMERA: ${s.camera}\nENVIRONMENT: ${s.environment}`;
+        return `${type}\nDESCRIPTION: ${s.description}\n${s.sinhalaDescription ? `SINHALA DESCRIPTION: ${s.sinhalaDescription}\n` : ''}SCRIPT: ${s.scriptLine}\n${s.sinhalaScriptLine ? `SINHALA SCRIPT: ${s.sinhalaScriptLine}\n` : ''}PROMPT: ${s.imagePrompt || s.characterDescription}\nCAMERA: ${s.camera}\nENVIRONMENT: ${s.environment}`;
       }).join('\n\n');
     
     const blob = new Blob([content], { type: 'text/plain' });
@@ -1191,6 +1195,13 @@ export default function App() {
                         <span className="font-mono text-[10px] opacity-40 mb-2 border-b border-current/10 pb-2 w-fit">0{i + 1}</span>
                         <h3 className="text-2xl font-black uppercase tracking-tighter leading-none">{topic.title}</h3>
                         <p className="text-sm opacity-60 group-hover:opacity-80 font-serif italic leading-relaxed">{topic.description}</p>
+                        
+                        {(topic.sinhalaTitle || topic.sinhalaDescription) && selectedCharacter?.language !== 'Sinhala' && (
+                          <div className="pt-4 border-t border-current/10 space-y-2 opacity-40 group-hover:opacity-100 transition-opacity">
+                            <h4 className="text-sm font-bold tracking-tight">{topic.sinhalaTitle}</h4>
+                            <p className="text-[11px] font-serif italic leading-relaxed">{topic.sinhalaDescription}</p>
+                          </div>
+                        )}
                         <div className="mt-4 flex items-center gap-2 text-[9px] font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all">
                           Write Script <ChevronRight className="w-3 h-3" />
                         </div>
@@ -1225,15 +1236,23 @@ export default function App() {
                     </div>
                     <div className="flex flex-wrap items-center gap-6">
                       <div className="flex flex-col gap-2">
-                        <span className="text-[9px] font-mono uppercase tracking-widest opacity-40">Number of Scenes</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[9px] font-mono uppercase tracking-widest opacity-40">Number of Scenes</span>
+                          <span className="text-[10px] font-mono opacity-30">| දර්ශන සංඛ්‍යාව</span>
+                        </div>
                         <div className="flex items-center gap-2">
                           {[3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
                             <button
                               key={num}
                               onClick={() => setSceneCount(num)}
-                              className={`w-8 h-8 flex items-center justify-center text-[10px] font-bold border transition-all ${sceneCount === num ? 'bg-[#141414] text-[#E4E3E0] border-[#141414]' : 'border-[#141414]/20 hover:border-[#141414]'}`}
+                              className={`w-8 h-8 flex items-center justify-center text-[10px] font-bold border transition-all relative ${sceneCount === num ? 'bg-[#141414] text-[#E4E3E0] border-[#141414]' : 'border-[#141414]/20 hover:border-[#141414]'}`}
                             >
                               {num}
+                              {script?.recommendedSceneCount === num && (
+                                <div className="absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap bg-red-500 text-white text-[7px] px-1 py-0.5 font-bold uppercase tracking-widest pointer-events-none">
+                                  AI Rec
+                                </div>
+                              )}
                             </button>
                           ))}
                         </div>
@@ -1290,6 +1309,27 @@ export default function App() {
                         </div>
                       </div>
                     </div>
+
+                    {/* Sinhala Translation */}
+                    {selectedCharacter?.language !== 'Sinhala' && script.sinhala && (
+                      <div className="p-8 md:p-12 border border-[#141414] bg-red-50/10 shadow-[30px_30px_0px_0px_rgba(20,20,20,0.01)] relative group overflow-hidden">
+                        <div className="absolute top-8 right-8 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <CopyButton text={script.sinhala} label="Copy Sinhala" />
+                        </div>
+                        <div className="space-y-10">
+                          <div className="flex justify-between items-start border-b border-[#141414]/10 pb-6">
+                            <div className="space-y-1">
+                              <p className="text-[10px] font-mono uppercase tracking-[0.3em] opacity-40">Translation</p>
+                              <p className="text-xl font-black uppercase tracking-tighter leading-none">සිංහල (Sinhala)</p>
+                            </div>
+                          </div>
+                          
+                          <div className="font-serif text-lg md:text-xl leading-[1.4] tracking-tight text-[#141414]/80 italic relative px-8">
+                            {script.sinhala}
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <div className="pt-12 border-t border-[#141414]/10 flex justify-between items-center">
@@ -1367,9 +1407,16 @@ export default function App() {
                                   </span>
                                 )}
                                 {scene.description && (
-                                  <p className="text-[10px] font-mono opacity-60 uppercase tracking-widest mt-2 max-w-[200px] leading-relaxed">
-                                    {scene.description}
-                                  </p>
+                                  <div className="space-y-1">
+                                    <p className="text-[10px] font-mono opacity-60 uppercase tracking-widest mt-2 max-w-[200px] leading-relaxed">
+                                      {scene.description}
+                                    </p>
+                                    {scene.sinhalaDescription && (
+                                      <p className="text-[10px] font-mono text-[#141414]/40 tracking-normal max-w-[200px] leading-relaxed">
+                                        {scene.sinhalaDescription}
+                                      </p>
+                                    )}
+                                  </div>
                                 )}
                               </div>
                             </div>
@@ -1397,6 +1444,14 @@ export default function App() {
                             <div className="absolute top-0 left-0 w-1.5 h-full bg-[#141414]/10 group-hover/card:bg-[#141414] transition-colors"></div>
                             <h4 className="text-[10px] font-mono font-bold uppercase tracking-[0.5em] opacity-30 mb-10">Dialogue / Voiceover</h4>
                             <p className="text-4xl font-serif italic leading-relaxed tracking-tight text-[#141414] selection:bg-[#141414] selection:text-[#E4E3E0]">"{scene.scriptLine}"</p>
+                            {scene.sinhalaScriptLine && (
+                              <div className="mt-10 pt-10 border-t border-[#141414]/10">
+                                <span className="text-[8px] font-mono uppercase tracking-[0.3em] opacity-20 block mb-4">සිංහල පරිවර්තනය (Sinhala)</span>
+                                <p className="text-2xl font-serif leading-relaxed tracking-wide text-[#141414]/60">
+                                  {scene.sinhalaScriptLine}
+                                </p>
+                              </div>
+                            )}
                           </div>
 
                           {scene.imagePrompt && (

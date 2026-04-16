@@ -7,13 +7,28 @@ export const generateCharacters = async (): Promise<{name: string, role: string,
     model: "gemini-3-flash-preview",
     contents: "GENERATE 10 DIVERSE CHARACTER SAMPLES",
     config: {
-      systemInstruction: `You are a creative director for a documentary series. 
-GENERATE 10 diverse character roles from various walks of life and age groups (from youth to elderly).
-IMPORTANT: 
-- Use the ROLE/DESCRIPTION as the "name" field. Do NOT use personal names like "John" or "Silas".
-- Examples: "Young urban street artist (female)", "Middle-aged deep sea diver (male)", "Elderly tea plantation worker (female)", "Teenage competitive chess player (non-binary)", "Veteran mountain guide (male)".
-- The "role" field should be a 3-word atmospheric description (e.g., "Vibrant, Urban, Bold" or "Weathered, Wise, Patient").
-- Assign a "country" and its primary "language" to each character, ensuring global diversity (Asia, Europe, Africa, Americas, etc.).
+      systemInstruction: `You are an advanced creative director for a "Global Identity Engine".
+GENERATE 10 diverse character profiles that follow strict REAL-WORLD LOGIC.
+
+AGE → ROLE LOGIC (MANDATORY):
+- AGE 16–18: Student, cadet, trainee (NOT full professional roles).
+- AGE 18–22: Entry-level (Recruit, Private, Officer Cadet, Intern).
+- AGE 23–30: Junior roles (Soldier, Patrol Officer, Junior Doctor, Technician).
+- AGE 30–45: Mid-level (Sergeant, Detective, Senior Engineer, Specialist).
+- AGE 45–60: Senior roles (Commander, Inspector, Consultant, Director).
+- AGE 60+: Retired personnel ONLY (Veteran, Former Officer, Advisor).
+
+COUNTRY-SPECIFIC ACCURACY:
+- USA: Army ranks (Private → General), Police (Officer → Captain). Retirement ~20 years.
+- UK: Constables, Inspectors. Distinct badges/helmets.
+- India/Sri Lanka: Distinct uniform styles, badges, and hierarchical symbols.
+- Match appropriate naming conventions and cultural descriptors.
+
+OUTPUT RULES:
+- Use the detailed profile as the "name" field. format: "[Age] year old [Gender] [Proper Role/Rank]".
+- Example "name": "68 year old Male Retired Sri Lankan Army Major General".
+- The "role" field should be a 3-word atmospheric mood description (e.g., "Disciplined, Stoic, Wise").
+- Assign "country" and "language" accurately.
 
 Return as a JSON array of objects with "name", "role", "country", and "language".`,
       responseMimeType: "application/json",
@@ -58,14 +73,23 @@ export const generateImagePrompt = async (character: string, location: string, c
     model: "gemini-3-flash-preview",
     contents: `Character: ${character}. Location: ${location}. Country/Culture: ${country}. Generate FULL ultra-detailed prompt.`,
     config: {
-      systemInstruction: `You are an AI Image Prompt Generator. Generate a FULL ultra-detailed prompt using the SAMPLE FORMAT below.
-Sections required: FACE & SKIN, HAIR/STYLING, CLOTHING, HANDS, POSE, BACKGROUND, LIGHTING, TECHNICAL.
-IMPORTANT: 
-- The character's skin tone, facial features, hair texture, and clothing MUST strictly reflect the culture and ethnicity of ${country}.
-- Clothing should be culturally authentic to ${country}, especially for rural or traditional roles.
-- Character always looks DIRECTLY into camera.
-- Style: Hyperrealistic, documentary portrait, 8K quality.
-- Lighting: Natural, cinematic.
+      systemInstruction: `You are an AI Image Prompt Generator focused on REALISM and ACCURACY.
+Generate a FULL ultra-detailed prompt using the following RULES:
+
+UNIFORM GENERATION RULE:
+- Uniform MUST match: Country (${country}), Profession, and Rank/Role (derived from ${character}).
+- Details MUST include: Correct colors (e.g., olive drab for Sri Lankan Army, blue for NYPD), specific badges, insignia, rank symbols on shoulder/sleeves, and accessories (hat, belt, medals).
+- If Retired (AGE 60+): Character wears formal/dress uniform (medals included) or dignified civilian attire appropriate for a veteran.
+- NO mixed-country uniforms or incorrect ranks.
+
+ENVIRONMENT & LOCATION LOGIC:
+- If Active Duty: Setting must be professional (Base, battlefield, station, hospital) within ${country}.
+- If Retired: Setting can be a home, memorial, or interview setup.
+- Weather and lighting must reflect the climate of ${country} (e.g., tropical sun for Sri Lanka, moody rain for London).
+
+STRICT FIDELITY:
+- Character features, skin tone, and hair texture UNCHANGED and culturally authentic to ${country}.
+- 8K, documentary portrait style, hyperealistic.
 
 Return the result as a JSON object matching this schema:
 {
@@ -88,21 +112,23 @@ Return the result as a JSON object matching this schema:
   return JSON.parse(response.text || "{}");
 };
 
-export const generateTopics = async (characterDescription: string, country: string, language: string): Promise<{title: string, description: string}[]> => {
+export const generateTopics = async (characterDescription: string, country: string, language: string): Promise<{title: string, description: string, sinhalaTitle: string, sinhalaDescription: string}[]> => {
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
     contents: `Character: ${characterDescription}. Country: ${country}. Language: ${language}. Generate 10 story-driven advice TOPIC OPTIONS.`,
     config: {
-      systemInstruction: `You are a Life Story & Advice Script Writer.
+      systemInstruction: `You are a Global Life Story & Advice Specialist.
 TOPIC RULES:
-- Every topic must feel like it could ONLY come from this specific character's life, age group, and the culture of ${country}.
-- Rooted in real situations their life/profession creates in ${country}.
-- Mix of: failure, loss, hard decisions, quiet wins, unexpected lessons, things they wish they knew at a different stage of life.
-- Nothing generic — no "believe in yourself" angles.
-- Should make the viewer think: "I never thought about it that way".
-- IMPORTANT: The "title" and "description" MUST be written in ${language}.
+- Every topic must follow the character's AGE and EXPERIENCE logic.
+- Young character (16-25) → ambition, struggle, learning from elders.
+- Mid-age (30-50) → leadership, responsibility, hard career calls.
+- Retired (60+) → memories, reflection, legacy, quiet observations on changes in ${country}.
+- Rooted in the specific culture of ${country}.
+- IMPORTANT: 
+  1. The "title" and "description" MUST be written in ${language}.
+  2. ALWAYS provide "sinhalaTitle" and "sinhalaDescription" (Sinhala translation).
 
-Return 10 topics as a JSON array of objects with "title" and "description" (one honest sentence).`,
+Return 10 topics as a JSON array of objects with "title", "description", "sinhalaTitle", and "sinhalaDescription".`,
       responseMimeType: "application/json",
       responseSchema: {
         type: Type.ARRAY,
@@ -110,9 +136,11 @@ Return 10 topics as a JSON array of objects with "title" and "description" (one 
           type: Type.OBJECT,
           properties: {
             title: { type: Type.STRING },
-            description: { type: Type.STRING }
+            description: { type: Type.STRING },
+            sinhalaTitle: { type: Type.STRING },
+            sinhalaDescription: { type: Type.STRING }
           },
-          required: ["title", "description"]
+          required: ["title", "description", "sinhalaTitle", "sinhalaDescription"]
         }
       }
     },
@@ -120,37 +148,40 @@ Return 10 topics as a JSON array of objects with "title" and "description" (one 
   return JSON.parse(response.text || "[]");
 };
 
-export const generateScript = async (characterDescription: string, topic: string, country: string, language: string): Promise<{native: string, english: string}> => {
+export const generateScript = async (characterDescription: string, topic: string, country: string, language: string): Promise<{native: string, english: string, sinhala: string, recommendedSceneCount: number}> => {
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
-    contents: `Character: ${characterDescription}. Topic: ${topic}. Country: ${country}. Language: ${language}. Write a 1-MINUTE SCRIPT and its English translation.`,
+    contents: `Character: ${characterDescription}. Topic: ${topic}. Country: ${country}. Language: ${language}. Write a 1-MINUTE SCRIPT, English translation, Sinhala translation, and recommended scene count.`,
     config: {
-      systemInstruction: `You are a Life Story & Advice Script Writer.
-LANGUAGE: The "native" script MUST be written entirely in ${language}.
-TRANSLATION: Provide a faithful "english" translation of the script.
-LENGTH: 120–130 words for the native script (strictly optimized for a 60-second slow-paced delivery).
-VOICE: First person.
-TONE: Real person, hard full life, NOT motivational, NOT poetic, pauses, short sentences, rough edges.
-CULTURE: The script should reflect the cultural nuances, idioms, and values of ${country}.
-STRUCTURE (Narrative Arc for Clarity):
-1. OPENING: A vivid, specific memory that sets the scene (25-30 words).
-2. MIDDLE: The core conflict or turning point—what happened and what it cost (55-60 words).
-3. CLOSING: A grounded, hard-won lesson or advice for the next generation (35-40 words).
+      systemInstruction: `You are a Global Script Writer specializing in REALISM over creativity.
+STORY GENERATION RULE:
+- Story MUST be emotionally engaging and BELIEVABLE based on character age/experience.
+- Young character (16-25) → ambition, struggle, learning.
+- Mid-age (30-50) → leadership, responsibility, hard career calls.
+- Retired (60+): Story MUST be PERSONAL experience. MUST NOT represent official government voice. MUST NOT include political promotion or classified/sensitive info.
+- TONE: Hard-won wisdom, grounded, rough edges. Use country-specific idioms of ${country}.
+- LENGTH: 120–130 words for the native script (slow-paced 60s delivery).
 
-BANNED: "Life is a journey", "I've learned that", "Trust the process", rhyming, inspirational poster language.
-Start mid-scene. Use sensory details. Ensure the story is clear and easy to follow for any audience.`,
+LANGUAGE: 
+- "native" script in ${language}.
+- "english" translation.
+- "sinhala" translation.
+
+Return as a JSON object with "native", "english", "sinhala", and "recommendedSceneCount".`,
       responseMimeType: "application/json",
       responseSchema: {
         type: Type.OBJECT,
         properties: {
           native: { type: Type.STRING },
-          english: { type: Type.STRING }
+          english: { type: Type.STRING },
+          sinhala: { type: Type.STRING },
+          recommendedSceneCount: { type: Type.INTEGER }
         },
-        required: ["native", "english"]
+        required: ["native", "english", "sinhala", "recommendedSceneCount"]
       }
     },
   });
-  return JSON.parse(response.text || '{"native": "", "english": ""}');
+  return JSON.parse(response.text || '{"native": "", "english": "", "sinhala": "", "recommendedSceneCount": 8}');
 };
 
 export const generateVideoScenes = async (characterDescription: string, script: string, country: string, language: string, sceneCount: number = 8): Promise<any[]> => {
@@ -158,49 +189,46 @@ export const generateVideoScenes = async (characterDescription: string, script: 
     model: "gemini-3-flash-preview",
     contents: `Character: ${characterDescription}. Script: ${script}. Country: ${country}. Language: ${language}. Generate exactly ${sceneCount} scene-by-scene video prompts. IMPORTANT: The first scene MUST be a high-retention HOOK.`,
     config: {
-      systemInstruction: `You are a Video Scene Prompt Generator for AI video tools.
-Split the script naturally into exactly ${sceneCount} scenes.
-DURATION: Each scene = exactly 8 seconds. 
+      systemInstruction: `You are a Global Scene & Uniform Logic Engine.
+Generate exactly ${sceneCount} scenes with strict UNIFORM and ENVIRONMENT accuracy.
+
+UNIFORM GENERATION RULE:
+- Uniform MUST match: Country (${country}), Profession, and Rank/Role (derived from ${characterDescription}).
+- Details include: Correct colors, specific badges, insignia on shoulder/sleeves, and accessories.
+- If Retired: Character wears formal/dress uniform or veteran-appropriate civilian attire.
+
+ENVIRONMENT & LOCATION LOGIC:
+- Scenes MUST match profession + country. Military → base/battlefield. Civilian → local street/home in ${country}.
+- Climate, lighting, and architecture MUST reflect ${country}.
 
 HOOK & RETENTION (SCENE 1):
-- Scene 1 MUST be a "Hook" designed for maximum audience retention.
-- It should summarize the core emotional or narrative value of the entire script.
-- It should highlight the "most valuable part" or a "dramatic peak" to grab attention immediately.
-- The script line for Scene 1 should be a summary or a powerful opening statement that keeps the audience watching.
+- Scene 1 MUST be a "Hook" designed for maximum retention.
+- It summarizes the core emotional peak or narrative value of the entire script.
 
 STORY FLOW (SCENE 2 TO ${sceneCount}):
-- The actual narrative/script distribution begins from Scene 2.
-- Analyze the story and break it into meaningful emotional or narrative shifts across the remaining ${sceneCount - 1} scenes.
-- Pacing should be slow and unhurried.
-- Ensure the story arc (Beginning, Middle, End) is perfectly distributed among the remaining scenes.
+- Narrative begins from Scene 2. Break script into meaningful emotional shifts.
+- Pacing: Slow, unhurried, 8 seconds per scene.
 
-CAMERA & VARIATION RULES:
-- For every new scene: CHANGE camera angle (front, 3/4, side profile, top-down, close-up, extreme close-up, wide shot, over-the-shoulder, low angle).
-- Vary lens feel (50mm, 85mm, macro, wide).
-- Adjust composition and framing for smooth visual continuity.
+CONSISTENCY:
+- Identical facial features, age, and uniform details across ALL scenes.
 
-EMOTION RULES:
-- Match facial expression and body language to the story moment (e.g., calm → thinking → pain → intensity → reflection → strength).
-- Add slight natural variation in pose and micro-expression while maintaining identity.
-
-CONSISTENCY RULES:
-- Maintain identical facial features, same age, same hairstyle, same clothing/uniform details across all scenes.
-- Keep the same character identity in every frame.
+SINHALA TRANSLATIONS:
+- Provide "sinhalaDescription" and "sinhalaScriptLine".
 
 Return a JSON array of scene objects. Each scene MUST include:
-- description: string (A short scene description representing a meaningful emotional or narrative shift)
-- scriptLine: string (The line from the script in ${language}, with [PAUSE], [SLOW], [HOLD] marks)
-- characterDescription: string (Full physical description fresh every scene, reflecting their age, state, and the culture of ${country})
-- expressionMicroMovement: object { eyes, brow, jawLips, overall }
+- description: string (emotional/narrative shift)
+- sinhalaDescription: string
+- scriptLine: string (in ${language})
+- sinhalaScriptLine: string
+- characterDescription: string (Full physical description with uniform/rank details)
+- expressionMicroMovement: object
 - bodyLanguage: string
-- camera: string (Detailed camera angle, lens feel, and composition)
+- camera: string (Vary angle: front, profile, wide, close-up, lens choice)
 - environment: string
-- imagePrompt: string (A consolidated, high-fidelity image prompt for this specific scene, combining character, environment, lighting, and camera angle)
-- voiceDirection: object { pace, tone, texture, delivery, languageNote: "Note on ${language} pronunciation/accent for ${country}" }
+- imagePrompt: string (Consolidated fidelity prompt)
+- voiceDirection: object
 - audio: string
-- estimatedDuration: number (8)
-
-Do not abbreviate character descriptions. Render every detail of their physical presence.`,
+- estimatedDuration: number (8)`,
       responseMimeType: "application/json"
     },
   });
